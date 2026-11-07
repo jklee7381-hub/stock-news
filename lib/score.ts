@@ -158,6 +158,7 @@ export function processArticles(articles: Article[], now: Date = new Date()): { 
         title: it.title,
         source: it.source,
         link: it.link,
+        publishedAt: it.publishedAt,
         reason: "점수미달",
         detail: "0점",
       });
