@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { getSnapshot } from "@/lib/snapshot";
+import { hashLink } from "@/lib/state";
+import ArticleDetail from "./article-detail";
 
 function kst(iso: string): string {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -62,7 +64,8 @@ async function Board() {
               </div>
               <span className="w-12 text-right text-sm font-bold text-indigo-900">{it.score.total}점</span>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
+            <ArticleDetail id={hashLink(it.link)} link={it.link} />
+            <p className="mt-2 text-xs text-slate-500">
               영향도 {it.score.impact} · 매체 {it.score.trust} · 다수보도 {it.score.multi} · 최신성 {it.score.recency}
               {it.keywords.length > 0 && <> · {it.keywords.join(", ")}</>}
             </p>
