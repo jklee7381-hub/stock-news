@@ -45,3 +45,6 @@ next-env.d.ts
 .claude/
 trash-can/
 .env.local
+
+# 전송 기록(로컬 시험용)
+.state/
