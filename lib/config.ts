@@ -9,6 +9,20 @@ export const KEYWORDS: string[] = [
   "SOXX", "필라델피아 반도체", "HBM", "D램", "DRAM", "낸드", "파운드리", "패키징",
   "EUV", "ASML", "TSMC", "엔비디아", "CAPEX", "설비투자", "반도체 수출", "반도체 규제",
   "관세",
+  // 실제 기사 점검(작업 3)에서 빠져 있던 것들
+  "뉴욕증시", "뉴욕 증시", "미국 증시", "미국증시", "다우", "금리인상", "금리인하", "금리 동결",
+  "미국 고용", "美 고용", "미 고용", "비농업", "美 국채", "미국 국채", "반도체주", "마이크론",
+];
+
+// '관세청'처럼 뜻이 다른 단어에 붙은 경우는 키워드로 보지 않는다.
+export const NOT_FOLLOWED_BY: Record<string, string[]> = { "관세": ["청", "사", "법인"] };
+
+// '급등'은 개별 급등주를 걸러내는 단어지만, 제목에 아래 지수·거시 단어가 함께 있으면 시장 전체 기사로 보고 살려 준다.
+// 단, 특징주·상한가·테마주·급등주 같은 다른 배제어가 하나라도 있으면 그대로 폐기한다.
+export const SURGE_EXEMPT_TERMS = ["급등"];
+export const SURGE_EXEMPT_WITH: string[] = [
+  "나스닥", "S&P500", "S&P 500", "필라델피아 반도체", "다우", "뉴욕증시", "뉴욕 증시", "미국 증시", "미국증시",
+  "국채", "기준금리", "FOMC", "연준", "CPI",
 ];
 
 // 배제 단어: 제목에 하나라도 있으면 즉시 폐기
@@ -23,7 +37,7 @@ export const WORD_BOUNDARY_TERMS = new Set(["CB", "BW", "CPI", "PCE", "M7", "QQQ
 
 // 영향도(35점 만점): 위에서부터 먼저 맞는 것의 점수를 쓴다.
 export const IMPACT_RULES: { score: number; label: string; terms: string[] }[] = [
-  { score: 35, label: "매크로 핵심", terms: ["파월", "CPI", "소비자물가", "PCE", "FOMC", "기준금리", "금리 인하", "금리 인상", "금리 동결", "실업률", "고용보고서", "수출 통제", "수출 금지", "반도체 규제"] },
+  { score: 35, label: "매크로 핵심", terms: ["파월", "CPI", "소비자물가", "PCE", "FOMC", "기준금리", "금리 인하", "금리 인상", "금리 동결", "금리인하", "금리인상", "미국 고용", "美 고용", "미 고용", "비농업", "실업률", "고용보고서", "수출 통제", "수출 금지", "반도체 규제"] },
   { score: 25, label: "빅테크 실적·CAPEX", terms: ["실적", "어닝", "CAPEX", "설비투자", "빅테크", "M7", "매그니피센트"] },
   { score: 15, label: "업황·전망", terms: ["D램", "DRAM", "낸드", "HBM", "파운드리", "반도체 수출", "전망", "가격"] },
 ];
@@ -48,7 +62,7 @@ export const RECENCY_RULES = [
 ];
 
 // 긴급 알림 조건 (제목 기준). 배제어 규칙은 긴급에도 그대로 적용된다.
-export const URGENT_MACRO_TERMS = ["CPI", "FOMC", "금리 인하", "금리 인상", "파월", "실업률"];
+export const URGENT_MACRO_TERMS = ["CPI", "FOMC", "금리 인하", "금리 인상", "금리인하", "금리인상", "파월", "실업률"];
 export const URGENT_INDEX_TERMS = ["나스닥", "필라델피아 반도체"];
 export const URGENT_INDEX_MOVE_TERMS = ["급락", "폭락", "2% 하락", "2% 상승", "2% 이상"];
 export const URGENT_POLICY_TERMS = ["상무부", "대중 반도체", "반도체 규제", "수출 금지", "수출 통제", "엔비디아 칩"];
