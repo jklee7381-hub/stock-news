@@ -4,7 +4,7 @@ import {
 } from "./config.ts";
 import type { Article } from "./rss.ts";
 
-export type Dropped = Article & { reason: "배제어" | "키워드없음"; detail: string };
+export type Dropped = Article & { reason: "배제어" | "키워드없음" | "점수미달"; detail: string };
 
 // 제목에 단어가 들어 있는지 확인한다. 영문 약어는 다른 영문·숫자 사이에 끼면 무시한다. (예: CB가 CBS 안에 있는 경우)
 export function hasTerm(text: string, term: string): boolean {
