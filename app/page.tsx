@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { CATEGORY_ORDER } from "@/lib/config";
+import type { Scored } from "@/lib/score";
 import { getSnapshot } from "@/lib/snapshot";
 import { hashLink } from "@/lib/state";
 import ArticleDetail from "./article-detail";
@@ -26,7 +27,7 @@ function Stat({ label, value, accent }: { label: string; value: number | string;
   );
 }
 
-function ArticleCard({ it }: { it: any }) {
+function ArticleCard({ it }: { it: Scored }) {
   return (
     <li className={`${card} p-4 ${it.urgent ? "border-[#d92b2b]" : ""}`}>
       <div className="flex flex-wrap items-center gap-2 text-xs text-[#6d7882]">
@@ -186,16 +187,6 @@ export default function Home() {
           <p className="mt-4 text-sm text-[#d6e0eb]">국내 반도체 및 미국 지수·빅테크 뉴스를 점수로 거르고 브리핑합니다</p>
         </div>
       </div>
-
-      <main className="mx-auto -mt-14 w-full max-w-3xl space-y-8 px-4">
-        <Suspense fallback={<p className={`${card} p-5 text-sm text-[#6d7882] shadow-[0_10px_28px_rgba(5,37,97,0.22)]`}>기사를 모으는 중입니다…</p>}>
-          <Board />
-        </Suspense>
-        <p className="text-xs text-[#6d7882]">기사 제목과 원문 링크, 본문 앞부분만 표시합니다. 투자 판단과 책임은 본인에게 있습니다.</p>
-      </main>
-    </div>
-  );
-}
 
       <main className="mx-auto -mt-14 w-full max-w-3xl space-y-8 px-4">
         <Suspense fallback={<p className={`${card} p-5 text-sm text-[#6d7882] shadow-[0_10px_28px_rgba(5,37,97,0.22)]`}>기사를 모으는 중입니다…</p>}>
