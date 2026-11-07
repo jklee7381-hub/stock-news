@@ -24,7 +24,13 @@ async function main() {
   const { items } = processArticles(articles, now);
   console.log(`수집 ${articles.length}건 → 통과 ${items.length}건`);
 
-  if (mode === "urgent") {
+  if (mode === "test") {
+    const testMsg = `🔔 <b>[텔레그램 알림봇 테스트]</b>\n\n연동이 성공적으로 완료되었습니다!\n\n• <b>수집 현황</b>: 총 ${articles.length}건 수집 → ${items.length}건 선별 완료\n• <b>대표 1위 소식</b>: ${items[0]?.title ?? "기사 없음"}\n• <b>설정된 카테고리</b>: 국내 증시·반도체, 글로벌 반도체, 미국 지수 등`;
+    console.log("테스트 메시지 전송 중...");
+    if (dry) console.log("[시험] 보낼 내용:\n" + testMsg);
+    else await sendTelegram(testMsg);
+    console.log("테스트 메시지 전송 완료!");
+  } else if (mode === "urgent") {
     const sent = loadSent(sentFile, now.getTime());
     const fresh = items.filter((i) => i.urgent && !sent[hashLink(i.link)]).slice(0, MAX_URGENT_PER_RUN);
     console.log(`긴급 대상 ${fresh.length}건 (이미 보낸 것 제외)`);
