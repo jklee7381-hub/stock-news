@@ -50,7 +50,7 @@ export const RECENCY_RULES = [
 // 긴급 알림 조건 (제목 기준). 배제어 규칙은 긴급에도 그대로 적용된다.
 export const URGENT_MACRO_TERMS = ["CPI", "FOMC", "금리 인하", "금리 인상", "파월", "실업률"];
 export const URGENT_INDEX_TERMS = ["나스닥", "필라델피아 반도체"];
-export const URGENT_INDEX_MOVE_TERMS = ["급락", "폭락", "급등락", "2% 하락", "2% 상승", "2% 이상"];
+export const URGENT_INDEX_MOVE_TERMS = ["급락", "폭락", "2% 하락", "2% 상승", "2% 이상"];
 export const URGENT_POLICY_TERMS = ["상무부", "대중 반도체", "반도체 규제", "수출 금지", "수출 통제", "엔비디아 칩"];
 export const URGENT_M7_TERMS = ["엔비디아", "마이크로소프트", "애플", "구글", "알파벳", "아마존", "메타", "테슬라"];
 export const URGENT_EARNINGS_TERMS = ["서프라이즈", "쇼크", "어닝"];
