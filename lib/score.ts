@@ -1,6 +1,6 @@
 // 점수: 영향도 35 + 매체 신뢰도 30 + 다수 매체 20 + 최신성 15 = 100
 import {
-  IMPACT_RULES, MULTI_MIN_SOURCES, MULTI_SCORE, RECENCY_RULES, TRUST_MID, TRUST_SCORE, TRUST_TOP,
+  CATEGORIES, CATEGORY_OTHER, IMPACT_RULES, MULTI_MIN_SOURCES, MULTI_SCORE, RECENCY_RULES, TRUST_MID, TRUST_SCORE, TRUST_TOP,
 } from "./config.ts";
 import { filterArticles, findTerms, type Dropped } from "./filter.ts";
 import { isGoogleNewsLink } from "./gnews.ts";
@@ -10,6 +10,7 @@ import { urgentReason } from "./urgent.ts";
 export type ScoreParts = { impact: number; trust: number; multi: number; recency: number; total: number };
 export type Scored = Article & {
   keywords: string[];
+  category: string;
   score: ScoreParts;
   impactLabel: string;
   urgent: boolean;
@@ -22,6 +23,11 @@ export function impactOf(title: string): { score: number; label: string } {
     if (findTerms(title, rule.terms).length) return { score: rule.score, label: rule.label };
   }
   return { score: 0, label: "" };
+}
+
+export function categoryOf(title: string): string {
+  for (const c of CATEGORIES) if (findTerms(title, c.terms).length) return c.name;
+  return CATEGORY_OTHER;
 }
 
 export function trustOf(source: string): number {
@@ -62,6 +68,7 @@ export function processArticles(articles: Article[], now: Date = new Date()): { 
     const reason = urgentReason(a.title, a.publishedAt, now);
     return {
       ...a,
+      category: categoryOf(a.title),
       score: { impact: impact.score, trust, multi, recency, total: impact.score + trust + multi + recency },
       impactLabel: impact.label,
       urgent: reason !== null,

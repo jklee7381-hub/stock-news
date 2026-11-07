@@ -90,3 +90,14 @@ export const ALLOWED_HOSTS = new Set([
 
 export const FETCH_TIMEOUT_MS = 10_000;
 export const MAX_FEED_BYTES = 2_000_000;
+
+// 카테고리: 위에서부터 먼저 맞는 것으로 정한다 (제목 기준). 하나도 안 맞으면 '기타'.
+// 순서가 중요하다: 예) '엔비디아·TSMC D램' 기사는 빅테크보다 반도체가 먼저 맞아야 한다.
+export const CATEGORIES: { name: string; terms: string[] }[] = [
+  { name: "정책·규제", terms: ["관세", "수출 통제", "수출통제", "수출 금지", "반도체 규제", "대중 반도체", "상무부", "제재", "보조금"] },
+  { name: "금리·물가·고용", terms: ["연준", "FOMC", "파월", "기준금리", "금리", "국채", "CPI", "PCE", "물가", "고용", "실업률", "비농업", "경기침체", "연착륙"] },
+  { name: "반도체", terms: ["HBM", "D램", "DRAM", "낸드", "파운드리", "패키징", "EUV", "ASML", "TSMC", "SOXX", "필라델피아 반도체", "마이크론", "반도체"] },
+  { name: "빅테크·AI", terms: ["엔비디아", "빅테크", "M7", "매그니피센트", "애플", "마이크로소프트", "구글", "알파벳", "아마존", "메타", "테슬라", "CAPEX", "설비투자"] },
+  { name: "지수·시장", terms: ["나스닥", "QQQ", "S&P500", "S&P 500", "다우", "뉴욕증시", "뉴욕 증시", "미국 증시", "미국증시"] },
+];
+export const CATEGORY_OTHER = "기타";
