@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local work folders (not for deploy)
+.bkit/
+.claude/
+trash-can/
+.env.local

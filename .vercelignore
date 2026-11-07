@@ -1,0 +1,7 @@
+# files not to upload to Vercel
+trash-can/
+.bkit/
+.claude/
+.next/
+node_modules/
+.env*
