@@ -1,0 +1,11 @@
+import { collectArticles } from "../lib/rss.ts";
+import { processArticles } from "../lib/score.ts";
+const { articles } = await collectArticles();
+const { items, dropped } = processArticles(articles);
+console.log("=== 배제어로 폐기 ===");
+for (const d of dropped.filter((d) => d.reason === "배제어")) console.log(`[${d.detail}] ${d.source} | ${d.title}`);
+console.log("=== 통과 (전체) ===");
+for (const i of items) console.log(`${i.score.total} ${i.urgent ? "U" : " "} [${i.keywords.join(",")}] ${i.source} | ${i.title}`);
+console.log("=== 키워드없음 중 구글뉴스 출처(사람이 보기엔 관련 있을 수 있음) 샘플 ===");
+const kw = dropped.filter((d) => d.reason === "키워드없음" && /미국|뉴욕|증시|반도체|금리|물가|연준|SK하이닉스|삼성전자|엔비|AI/.test(d.title));
+for (const d of kw.slice(0, 60)) console.log(`${d.source} | ${d.title}`);

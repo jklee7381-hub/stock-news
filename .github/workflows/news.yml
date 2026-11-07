@@ -1,0 +1,83 @@
+name: news-alert
+
+# 예약 시간은 UTC 기준이다 (한국시간 = UTC + 9).
+# GitHub 예약은 몇 분~수십 분 늦게 시작될 수 있다.
+on:
+  schedule:
+    - cron: "*/10 * * * 1-5"   # 긴급 체크: 평일 10분마다
+    - cron: "0 22 * * 0-5"     # 미국장 마감 브리핑: 한국 월~토 07:00
+    - cron: "0 7 * * 1-5"      # 한국장 마감 브리핑: 한국 월~금 16:00
+    - cron: "30 12 * * 1-5"    # 미국장 개장 전 체크: 한국 월~금 21:30
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "실행할 작업 (수동 실행용)"
+        required: true
+        default: "urgent-dry"
+        type: choice
+        options:
+          - urgent-dry
+          - urgent
+          - us-close
+          - kr-close
+          - pre-market
+
+permissions:
+  contents: read
+
+# 같은 작업이 겹쳐 돌면 전송 기록이 꼬이므로 하나씩만 실행한다.
+concurrency:
+  group: news-alert
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 이미 보낸 기사 기록을 불러온다 (가장 최근 것)
+      - name: 전송 기록 불러오기
+        uses: actions/cache/restore@v4
+        with:
+          path: .state
+          key: sent-${{ github.run_id }}
+          restore-keys: |
+            sent-
+
+      - name: 실행
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_MODE: ${{ inputs.mode }}
+        run: |
+          MODE="$INPUT_MODE"
+          if [ -z "$MODE" ]; then
+            case "$SCHEDULE" in
+              "*/10 * * * 1-5") MODE="urgent" ;;
+              "0 22 * * 0-5")   MODE="us-close" ;;
+              "0 7 * * 1-5")    MODE="kr-close" ;;
+              "30 12 * * 1-5")  MODE="pre-market" ;;
+              *) echo "알 수 없는 예약입니다."; exit 1 ;;
+            esac
+          fi
+          echo "실행 모드: $MODE"
+          case "$MODE" in
+            urgent)      node scripts/run.ts urgent ;;
+            urgent-dry)  node scripts/run.ts urgent --dry ;;
+            *)           node scripts/run.ts briefing "$MODE" ;;
+          esac
+
+      # 긴급 실행이 끝나면 전송 기록을 저장한다 (실패해도 이미 보낸 기록은 남긴다)
+      - name: 전송 기록 저장
+        if: always() && hashFiles('.state/sent.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .state
+          key: sent-${{ github.run_id }}

@@ -54,7 +54,7 @@ QQQ·나스닥·S&P500과 반도체(SOXX·HBM·TSMC·엔비디아) 관련 기사
 ## 7. 데이터·보안·개인정보
 - 저장하는 데이터: 서버 DB 없음. 이미 보낸 기사 링크 해시만 GitHub Actions 캐시에 임시 보관.
 - 외부로 보내는 데이터: 기사 제목·매체·링크를 텔레그램(내 봇, 내 채팅)으로 전송. 개인정보 없음.
-- 비밀 값(API 키): `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`(GitHub Actions 비밀값으로 등록), `CRON_SECRET`(관리용 API 보호). 코드·채팅에 적지 않는다.
+- 비밀 값(API 키): `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`(GitHub Actions 비밀값으로 등록). 코드·채팅에 적지 않는다.
 - 접근 보호: 웹 화면은 기사 제목·링크만 보여 주는 읽기 전용(공개 가능). 텔레그램을 보내는 기능은 웹에 두지 않고 Actions에서만 실행된다. 최종 공개 방식은 배포 전에 다시 선택한다.
 - 저작권: 기사 제목과 원문 링크만 사용하고 본문은 가져오지 않는다.
 

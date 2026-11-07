@@ -1,0 +1,12 @@
+import { collectArticles } from "../lib/rss.ts";
+import { processArticles } from "../lib/score.ts";
+import { buildBriefing, buildUrgent } from "../lib/summarizer.ts";
+const now = new Date();
+const { articles } = await collectArticles();
+const { items } = processArticles(articles, now);
+const text = buildBriefing("us-close", items, now);
+console.log(text);
+console.log("\n--- 글자 수:", text.length);
+console.log("\n--- 긴급 예시 ---");
+console.log(buildUrgent({ ...items[0], urgent: true, urgentReason: "매크로 속보", title: "[속보] A<B & \"C\"" }));
+console.log("\n--- 빈 경우 ---\n" + buildBriefing("pre-market", [], now));
