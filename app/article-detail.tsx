@@ -37,33 +37,33 @@ export default function ArticleDetail({ id, link }: { id: string; link: string }
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-800 hover:bg-indigo-100"
+        className="rounded border border-[#ebebeb] bg-white px-2.5 py-1 text-xs font-medium text-[#555555] transition hover:border-[#083891] hover:text-[#083891]"
       >
         {open ? "▲ 접기" : "▼ 요약·용어·본문 보기"}
       </button>
 
       {open && (
-        <div className="mt-3 space-y-3 rounded-xl bg-slate-50 p-3 text-sm leading-relaxed text-slate-800">
-          {state === "loading" && <p className="text-slate-500">본문을 가져오는 중입니다…</p>}
-          {state === "error" && <p className="text-red-600">불러오지 못했습니다. 잠시 뒤 다시 눌러 주세요.</p>}
+        <div className="mt-3 space-y-3 rounded-2xl bg-[#f4f5f6] p-4 text-sm leading-relaxed text-[#1e2124]">
+          {state === "loading" && <p className="text-[#6d7882]">본문을 가져오는 중입니다…</p>}
+          {state === "error" && <p className="text-[#d92b2b]">불러오지 못했습니다. 잠시 뒤 다시 눌러 주세요.</p>}
 
           {state === "done" && d && (
             <>
               {d.ok && d.summary && (
                 <section>
-                  <h3 className="mb-1 text-xs font-bold text-indigo-900">요약</h3>
+                  <h3 className="mb-1 text-xs font-bold text-[#083891]">요약</h3>
                   <p>{d.summary}</p>
                 </section>
               )}
 
               {d.terms.length > 0 && (
                 <section>
-                  <h3 className="mb-1 text-xs font-bold text-indigo-900">용어 풀이</h3>
+                  <h3 className="mb-1 text-xs font-bold text-[#083891]">용어 풀이</h3>
                   <dl className="space-y-1 text-xs">
                     {d.terms.map((t) => (
                       <div key={t.term}>
                         <dt className="inline font-semibold">{t.term}</dt>
-                        <dd className="inline text-slate-600"> — {t.explanation}</dd>
+                        <dd className="inline text-[#58616a]"> — {t.explanation}</dd>
                       </div>
                     ))}
                   </dl>
@@ -71,16 +71,16 @@ export default function ArticleDetail({ id, link }: { id: string; link: string }
               )}
 
               <section>
-                <h3 className="mb-1 text-xs font-bold text-indigo-900">본문</h3>
+                <h3 className="mb-1 text-xs font-bold text-[#083891]">본문</h3>
                 {d.ok ? (
                   <div className="space-y-2">
                     {d.excerpt.split(/\n+/).map((p, i) => (
                       <p key={i}>{p}</p>
                     ))}
-                    {d.truncated && <p className="text-xs text-slate-500">본문 앞부분만 보여 드립니다.</p>}
+                    {d.truncated && <p className="text-xs text-[#6d7882]">본문 앞부분만 보여 드립니다.</p>}
                   </div>
                 ) : (
-                  <p className="text-slate-500">{d.reason || "본문을 읽지 못했습니다."}</p>
+                  <p className="text-[#6d7882]">{d.reason || "본문을 읽지 못했습니다."}</p>
                 )}
               </section>
             </>
@@ -90,7 +90,7 @@ export default function ArticleDetail({ id, link }: { id: string; link: string }
             href={/^https?:\/\//i.test(link) ? link : "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block text-xs font-semibold text-indigo-700 underline"
+            className="inline-block text-xs font-semibold text-[#083891] underline"
           >
             원문에서 전체 보기 ↗
           </a>
