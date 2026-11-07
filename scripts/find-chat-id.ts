@@ -10,3 +10,5 @@ const seen = new Map<number, string>();
 for (const u of j.result ?? []) if (u.message) seen.set(u.message.chat.id, `${u.message.chat.type} ${u.message.chat.first_name ?? u.message.chat.title ?? ""}`);
 if (!seen.size) console.log("받은 메시지가 없습니다. 텔레그램에서 봇에게 아무 말이나 보낸 뒤 다시 실행하세요.");
 for (const [id, d] of seen) console.log(`chat id: ${id} (${d})`);
+
+export {};
