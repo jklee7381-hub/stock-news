@@ -36,3 +36,5 @@ npm run dev                               # http://localhost:3000
 - 투자 조언이 아닙니다. 기사 제목과 원문 링크만 제공합니다.
 - GitHub 예약 실행은 몇 분~수십 분 늦게 시작될 수 있습니다.
 - 문서: [PRD.md](PRD.md) · [PLAN.md](PLAN.md) · [DESIGN.md](DESIGN.md)
+
+<!-- vercel trigger: b250fd5 -->
