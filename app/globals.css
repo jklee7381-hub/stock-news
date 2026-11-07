@@ -1,12 +1,23 @@
 @import "tailwindcss";
 
+/* 밝은 화면 한 가지만 사용한다 (어두운 모드로 글자가 안 보이는 일을 막는다) */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #ffffff;
+  --foreground: #111111;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope), var(--font-pretendard);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  font-family:
+    var(--font-manrope), var(--font-pretendard), "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic",
+    "맑은 고딕", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
 }
