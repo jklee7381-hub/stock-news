@@ -5,7 +5,7 @@ name: news-alert
 on:
   schedule:
     - cron: "*/10 * * * 1-5"   # 긴급 체크: 평일 10분마다
-    - cron: "0 22 * * 1-5"     # 미국장 마감 브리핑: 한국 화~토 07:00 (미국 월~금 장 마감 후)
+    - cron: "0 22 * * 0-5"     # 미국장 마감 브리핑: 한국 월~토 07:00
     - cron: "0 7 * * 1-5"      # 한국장 마감 브리핑: 한국 월~금 16:00
     - cron: "30 12 * * 1-5"    # 미국장 개장 전 체크: 한국 월~금 21:30
   workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
           if [ -z "$MODE" ]; then
             case "$SCHEDULE" in
               "*/10 * * * 1-5") MODE="urgent" ;;
-              "0 22 * * 1-5")   MODE="us-close" ;;
+              "0 22 * * 0-5")   MODE="us-close" ;;
               "0 7 * * 1-5")    MODE="kr-close" ;;
               "30 12 * * 1-5")  MODE="pre-market" ;;
               *) echo "알 수 없는 예약입니다."; exit 1 ;;

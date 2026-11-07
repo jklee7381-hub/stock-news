@@ -1,69 +1,109 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import { getSnapshot } from "@/lib/snapshot";
+
+function kst(iso: string): string {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(new Date(iso));
+}
+
+// 링크는 http(s)만 허용한다
+function safeHref(link: string): string {
+  return /^https?:\/\//i.test(link) ? link : "#";
+}
+
+async function Board() {
+  let s;
+  try {
+    s = await getSnapshot();
+  } catch {
+    return (
+      <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        기사를 가져오지 못했습니다. 잠시 뒤 새로고침해 주세요.
+      </p>
+    );
+  }
+  const urgentCount = s.items.filter((i) => i.urgent).length;
+  return (
+    <>
+      <p className="text-sm text-slate-500">
+        {kst(s.updatedAt)} 기준 · 수집 {s.total}건 → 통과 {s.items.length}건 (긴급 {urgentCount}건) · 폐기 {s.dropped.length}건
+      </p>
+      {s.failures.length > 0 && (
+        <p className="mt-2 text-xs text-amber-700">일부 출처({s.failures.length}곳)를 읽지 못했습니다.</p>
+      )}
+
+      <ul className="mt-4 space-y-3">
+        {s.items.map((it) => (
+          <li
+            key={it.link}
+            className={`rounded-2xl border bg-white p-4 shadow-sm ${it.urgent ? "border-red-300" : "border-slate-200"}`}
+          >
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              {it.urgent && (
+                <span className="rounded-full bg-red-600 px-2 py-0.5 font-semibold text-white">
+                  🚨 긴급 · {it.urgentReason}
+                </span>
+              )}
+              <span>{it.source}{it.sourceCount > 1 ? ` 외 ${it.sourceCount - 1}곳` : ""}</span>
+              <span>· {kst(it.publishedAt)}</span>
+            </div>
+            <a
+              href={safeHref(it.link)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 block text-base font-semibold leading-snug text-slate-900 hover:text-indigo-700"
+            >
+              {it.title}
+            </a>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100" aria-hidden>
+                <div className="h-full rounded-full bg-indigo-700" style={{ width: `${it.score.total}%` }} />
+              </div>
+              <span className="w-12 text-right text-sm font-bold text-indigo-900">{it.score.total}점</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              영향도 {it.score.impact} · 매체 {it.score.trust} · 다수보도 {it.score.multi} · 최신성 {it.score.recency}
+              {it.keywords.length > 0 && <> · {it.keywords.join(", ")}</>}
+            </p>
+          </li>
+        ))}
+        {s.items.length === 0 && <li className="text-sm text-slate-500">조건에 맞는 기사가 없습니다.</li>}
+      </ul>
+
+      <details className="mt-8 rounded-2xl border border-slate-200 bg-white p-4">
+        <summary className="cursor-pointer text-sm font-semibold text-slate-700">
+          폐기된 기사와 이유 보기 (배제어 {s.dropped.filter((d) => d.reason === "배제어").length}건)
+        </summary>
+        <ul className="mt-3 space-y-1 text-xs text-slate-600">
+          {s.dropped
+            .filter((d) => d.reason === "배제어")
+            .map((d) => (
+              <li key={d.link}>
+                <span className="mr-1 rounded bg-slate-100 px-1.5 py-0.5 font-medium">{d.detail}</span>
+                {d.title} <span className="text-slate-400">({d.source})</span>
+              </li>
+            ))}
+        </ul>
+        <p className="mt-3 text-xs text-slate-400">
+          그 밖에 필수 키워드가 없어 제외된 기사 {s.dropped.filter((d) => d.reason === "키워드없음").length}건은 표시하지 않습니다.
+        </p>
+      </details>
+    </>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+      <h1 className="text-2xl font-bold text-indigo-950">미국지수·반도체 뉴스 알리미</h1>
+      <p className="mb-4 mt-1 text-sm text-slate-600">
+        QQQ·나스닥·반도체 중심 기사를 점수순으로 보여 줍니다. 텔레그램 알림은 자동으로 따로 전송됩니다.
+      </p>
+      <Suspense fallback={<p className="text-sm text-slate-500">기사를 모으는 중입니다…</p>}>
+        <Board />
+      </Suspense>
+      <p className="mt-8 text-xs text-slate-400">기사 제목과 원문 링크만 표시합니다. 투자 판단과 책임은 본인에게 있습니다.</p>
+    </main>
   );
 }
