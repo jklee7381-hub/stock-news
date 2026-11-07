@@ -147,5 +147,22 @@ export function processArticles(articles: Article[], now: Date = new Date()): { 
     }
   }
 
-  return { items: clustered, dropped };
+  // 0점인 기사(영향도 0, 신뢰도 0, 다수보도 0, 최신성 0)는 노이즈이므로 선별 목록에서 제외한다
+  const validItems: Scored[] = [];
+  const zeroDropped: Dropped[] = [];
+  for (const it of clustered) {
+    if (it.score.total > 0) {
+      validItems.push(it);
+    } else {
+      zeroDropped.push({
+        title: it.title,
+        source: it.source,
+        link: it.link,
+        reason: "점수미달",
+        detail: "0점",
+      });
+    }
+  }
+
+  return { items: validItems, dropped: [...dropped, ...zeroDropped] };
 }
