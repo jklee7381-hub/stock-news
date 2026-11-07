@@ -43,9 +43,58 @@ export function recencyOf(publishedAt: string, now: Date): number {
   return 0;
 }
 
-// 같은 소식(제목이 거의 같은 기사)을 하나로 묶는 열쇠
-function titleKey(title: string): string {
-  return title.toLowerCase().replace(/\[[^\]]*\]|\([^)]*\)/g, "").replace(/[^0-9a-z가-힣]/g, "").slice(0, 24);
+const STOPWORDS = new Set([
+  "등", "및", "에", "의", "도", "로", "으로", "과", "와", "은", "는", "이", "가", "을", "를",
+  "속", "앞두고", "가능성", "전망", "소식", "발표", "우려", "힘", "받는다", "검토", "하루",
+  "만에", "관련", "관련주", "브리핑", "시황", "마감", "종합", "vs", "더", "또", "왜", "때"
+]);
+
+// 기사 제목에서 핵심 단어 토큰들을 뽑아낸다
+export function extractTitleTokens(title: string): Set<string> {
+  const cleaned = title
+    .replace(/\[[^\]]*\]|\([^)]*\)|<[^>]*>|【[^】]*】/g, " ")
+    .replace(/['"‘’“”·…:|\-~]/g, " ")
+    .toLowerCase();
+
+  const words = cleaned.match(/[0-9a-z가-힣]+/g) ?? [];
+  const tokens = new Set<string>();
+  for (const w of words) {
+    if (w.length >= 2 && !STOPWORDS.has(w)) {
+      tokens.add(w);
+    }
+  }
+  return tokens;
+}
+
+// 두 기사가 실질적으로 같은 소식을 다루고 있는지 판정
+export function isSameStory(a: { title: string; publishedAt: string }, b: { title: string; publishedAt: string }): boolean {
+  // 1. 발행 시각이 36시간 이상 차이나면 다른 소식으로 본다
+  const diffHours = Math.abs(Date.parse(a.publishedAt) - Date.parse(b.publishedAt)) / 3600000;
+  if (!Number.isNaN(diffHours) && diffHours > 36) return false;
+
+  // 2. 제목의 특수문자 제거 후 상호 포함 관계
+  const cleanA = a.title.replace(/\[[^\]]*\]|\([^)]*\)/g, "").replace(/[^0-9a-z가-힣]/gi, "").toLowerCase();
+  const cleanB = b.title.replace(/\[[^\]]*\]|\([^)]*\)/g, "").replace(/[^0-9a-z가-힣]/gi, "").toLowerCase();
+  if (cleanA.length >= 10 && cleanB.length >= 10 && (cleanA.includes(cleanB) || cleanB.includes(cleanA))) return true;
+
+  // 3. 핵심 단어 유사도 판정
+  const tokensA = extractTitleTokens(a.title);
+  const tokensB = extractTitleTokens(b.title);
+  if (tokensA.size === 0 || tokensB.size === 0) return false;
+
+  let interCount = 0;
+  for (const t of tokensA) {
+    if (tokensB.has(t)) interCount++;
+  }
+  if (interCount === 0) return false;
+
+  const minSize = Math.min(tokensA.size, tokensB.size);
+  const unionSize = tokensA.size + tokensB.size - interCount;
+  const overlap = interCount / minSize;
+  const jaccard = interCount / unionSize;
+
+  // 겹치는 핵심 단어가 3개 이상이거나, 최소 단어 집합의 50% 이상 일치, 또는 자카드 0.35 이상
+  return interCount >= 3 || (interCount >= 2 && overlap >= 0.5) || jaccard >= 0.35;
 }
 
 export function processArticles(articles: Article[], now: Date = new Date()): { items: Scored[]; dropped: Dropped[] } {
@@ -77,21 +126,26 @@ export function processArticles(articles: Article[], now: Date = new Date()): { 
     };
   });
 
-  // 같은 소식은 점수가 가장 높은 한 건만 남기고 매체 수를 기록한다
-  const groups = new Map<string, Scored>();
-  for (const s of scored) {
-    const key = titleKey(s.title);
-    const cur = groups.get(key);
-    if (!cur) { groups.set(key, s); continue; }
-    const winner = s.score.total > cur.score.total ? s : cur;
-    const other = winner === s ? cur : s;
-    // 구글뉴스를 거치는 링크보다 언론사 원문 링크를 우선한다 (본문을 바로 읽을 수 있다)
-    const link = isGoogleNewsLink(winner.link) && !isGoogleNewsLink(other.link) ? other.link : winner.link;
-    groups.set(key, { ...winner, link, sourceCount: cur.sourceCount + 1, urgent: cur.urgent || s.urgent, urgentReason: cur.urgentReason ?? s.urgentReason });
-  }
-
-  const items = [...groups.values()].sort(
+  // 점수가 높은 순으로 정렬한 뒤, 이미 등록된 같은 소식 클러스터와 비교하여 병합한다
+  const sorted = [...scored].sort(
     (a, b) => b.score.total - a.score.total || Date.parse(b.publishedAt) - Date.parse(a.publishedAt),
   );
-  return { items, dropped };
+
+  const clustered: Scored[] = [];
+  for (const s of sorted) {
+    const existing = clustered.find((c) => isSameStory(c, s));
+    if (!existing) {
+      clustered.push({ ...s });
+    } else {
+      // 이미 더 높은 점수의 기사가 대표로 등록되어 있으므로 매체 수만 누적하고 링크를 개선한다
+      existing.sourceCount += 1;
+      existing.urgent = existing.urgent || s.urgent;
+      existing.urgentReason = existing.urgentReason ?? s.urgentReason;
+      if (isGoogleNewsLink(existing.link) && !isGoogleNewsLink(s.link)) {
+        existing.link = s.link; // 구글뉴스 우회 링크보다 언론사 원문 링크 선호
+      }
+    }
+  }
+
+  return { items: clustered, dropped };
 }
